@@ -1,4 +1,4 @@
-from shell import Shell
+from src.shell.shell import Shell
 
 
 def main() -> None:

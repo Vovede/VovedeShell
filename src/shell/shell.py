@@ -1,7 +1,7 @@
 import socket
 import getpass
 
-from parser import parse_command
+from src.shell.parser import parse_command
 
 
 class Shell:
