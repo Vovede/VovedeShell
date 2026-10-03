@@ -1,9 +1,10 @@
-"""Application entry point for the shell emulator."""
+from shell import Shell
 
 
 def main() -> None:
-    """Run the application placeholder."""
-    print("Shell emulator project scaffold is ready.")
+    """Application entry point."""
+    shell = Shell()
+    shell.run()
 
 
 if __name__ == "__main__":
