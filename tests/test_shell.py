@@ -1,4 +1,4 @@
-from src.shell.shell import Shell
+from shell.core import Shell
 
 
 def test_shell_has_username():
@@ -61,3 +61,22 @@ def test_cd_with_too_many_arguments(capsys):
     captured = capsys.readouterr()
 
     assert captured.out == "cd: too many arguments\n"
+
+def test_run_script(capsys, tmp_path):
+    script = tmp_path / "test.txt"
+
+    script.write_text("ls\n"
+                      "unknown",
+                      encoding="utf-8")
+
+    shell = Shell()
+    shell.run_script(str(script))
+
+    captured = capsys.readouterr()
+
+    assert captured.out == (
+        "$ ls\n"
+        "ls: not implemented yet\n"
+        "$ unknown\n"
+        "Unknown command: unknown\n"
+    )

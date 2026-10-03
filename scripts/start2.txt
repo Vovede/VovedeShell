@@ -1,0 +1,7 @@
+cd cd
+ls
+
+
+#sjgbkjgshvb
+exit
+ls

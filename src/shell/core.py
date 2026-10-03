@@ -1,7 +1,7 @@
 import socket
 import getpass
 
-from src.shell.parser import parse_command
+from shell.parser import parse_command
 
 
 class Shell:
@@ -51,3 +51,16 @@ class Shell:
             print("cd: not implemented yet")
         else:
             print(f"cd: not implemented yet: {args[0]}")
+
+    def run_script(self, path: str) -> None:
+        """Execute commands from a script file."""
+        from shell.script import read_script
+
+        for command_line in read_script(path):
+            print(f"$ {command_line}")
+            command, args = parse_command(command_line)
+
+            if command == "exit":
+                break
+
+            self.execute(command, args)

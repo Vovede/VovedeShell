@@ -1,0 +1,9 @@
+# Stage 2 test script
+
+ls
+ls
+
+# Change directory
+cd home
+
+unknown
