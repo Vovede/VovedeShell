@@ -5,9 +5,10 @@ from shell.parser import parse_command
 
 
 class Shell:
-    def __init__(self) -> None:
+    def __init__(self, vfs=None) -> None:
         self.username = getpass.getuser()
         self.hostname = socket.gethostname()
+        self.vfs = vfs
 
     def prompt(self) -> str:
         return f"{self.username}@{self.hostname}:~$ "
@@ -35,6 +36,8 @@ class Shell:
             self.command_ls(args)
         elif command == "cd":
             self.command_cd(args)
+        elif command == "vfs-init":
+            self.command_vfs_init(args)
         else:
             print(f"Unknown command: {command}")
 
@@ -51,6 +54,17 @@ class Shell:
             print("cd: not implemented yet")
         else:
             print(f"cd: not implemented yet: {args[0]}")
+
+    def command_vfs_init(self, args: list[str]) -> None:
+        """Initialize default virtual file system."""
+        if args:
+            print("vfs-init: arguments are not supported")
+            return
+
+        from shell.vfs import VFS
+
+        self.vfs = VFS.create_default_vfs()
+        print("VFS initialized")
 
     def run_script(self, path: str) -> None:
         """Execute commands from a script file."""
