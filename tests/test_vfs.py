@@ -431,3 +431,193 @@ def test_ls_directory(capsys):
     captured = capsys.readouterr()
 
     assert captured.out == "user.txt\nnotes.txt\n"
+
+def test_copy_file():
+    from shell.vfs import VFS
+
+    vfs = VFS({
+        "type": "directory",
+        "children": {
+            "source.txt": {
+                "type": "file",
+                "content": "Hello",
+            },
+        },
+    })
+
+    vfs.copy_file("/source.txt", "/copy.txt")
+
+    assert vfs.get_file_content("/copy.txt") == b"Hello"
+
+def test_copy_directory_fails():
+    from shell.vfs import VFS
+
+    vfs = VFS({
+        "type": "directory",
+        "children": {
+            "home": {
+                "type": "directory",
+                "children": {},
+            },
+        },
+    })
+
+    try:
+        vfs.copy_file("/home", "/copy")
+    except ValueError as error:
+        assert str(error) == "VFS path is not a file"
+    else:
+        assert False
+
+def test_copy_missing_file_fails():
+    from shell.vfs import VFS
+
+    vfs = VFS({
+        "type": "directory",
+        "children": {},
+    })
+
+    try:
+        vfs.copy_file("/missing.txt", "/copy.txt")
+    except ValueError as error:
+        assert str(error) == "VFS path not found"
+    else:
+        assert False
+
+def test_copy_to_missing_directory_fails():
+    from shell.vfs import VFS
+
+    vfs = VFS({
+        "type": "directory",
+        "children": {
+            "source.txt": {
+                "type": "file",
+                "content": "Hello",
+            },
+        },
+    })
+
+    try:
+        vfs.copy_file("/source.txt", "/missing/copy.txt")
+    except ValueError as error:
+        assert str(error) == "VFS path not found"
+    else:
+        assert False
+
+def test_copy_file_overwrites_existing():
+    from shell.vfs import VFS
+
+    vfs = VFS({
+        "type": "directory",
+        "children": {
+            "source.txt": {
+                "type": "file",
+                "content": "New",
+            },
+            "copy.txt": {
+                "type": "file",
+                "content": "Old",
+            },
+        },
+    })
+
+    vfs.copy_file("/source.txt", "/copy.txt")
+
+    assert vfs.get_file_content("/copy.txt") == b"New"
+
+def test_cp_relative_source():
+    from shell.vfs import VFS
+    from shell.core import Shell
+
+    vfs = VFS({
+        "type": "directory",
+        "children": {
+            "home": {
+                "type": "directory",
+                "children": {
+                    "user.txt": {
+                        "type": "file",
+                        "content": "Hello",
+                    },
+                },
+            },
+        },
+    })
+
+    shell = Shell(vfs)
+    shell.current_path = "/home"
+
+    shell.execute("cp", ["user.txt", "copy3.txt"])
+
+    assert vfs.get_file_content("/home/copy3.txt") == b"Hello"
+
+def test_cp_missing_destination_directory(capsys):
+    from shell.vfs import VFS
+    from shell.core import Shell
+
+    vfs = VFS({
+        "type": "directory",
+        "children": {
+            "source.txt": {
+                "type": "file",
+                "content": "Hello",
+            },
+        },
+    })
+
+    shell = Shell(vfs)
+    shell.execute("cp", ["/source.txt", "/missing/copy.txt"])
+
+    assert capsys.readouterr().out == (
+        "cp: VFS path not found\n"
+    )
+
+def test_cp_directory_fails(capsys):
+    from shell.vfs import VFS
+    from shell.core import Shell
+
+    vfs = VFS({
+        "type": "directory",
+        "children": {
+            "home": {
+                "type": "directory",
+                "children": {},
+            },
+        },
+    })
+
+    shell = Shell(vfs)
+    shell.execute("cp", ["/home", "/copy"])
+
+    assert capsys.readouterr().out == (
+        "cp: VFS path is not a file\n"
+    )
+
+def test_cp_invalid_arguments(capsys):
+    from shell.vfs import VFS
+    from shell.core import Shell
+
+    shell = Shell(VFS())
+
+    shell.execute("cp", [])
+
+    assert capsys.readouterr().out == (
+        "cp: expected source and destination\n"
+    )
+
+def test_cp_does_not_change_source():
+    from shell.vfs import VFS
+
+    vfs = VFS({
+        "type": "directory",
+        "children": {
+            "source.txt": {
+                "type": "file",
+                "content": "Original",
+            },
+        },
+    })
+
+    vfs.copy_file("/source.txt", "/copy.txt")
+
+    assert vfs.get_file_content("/source.txt") == b"Original"

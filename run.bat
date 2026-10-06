@@ -3,4 +3,4 @@ cd /d "%~dp0"
 
 set PYTHONPATH=%CD%\src
 
-"%CD%\.venv\Scripts\python.exe" -m shell.main %*
+"%CD%\.venv\Scripts\python.exe" -m shell.main --vfs data\vfs.json %*

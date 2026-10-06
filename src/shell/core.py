@@ -39,6 +39,8 @@ class Shell:
             self.command_ls(args)
         elif command == "cd":
             self.command_cd(args)
+        elif command == "cp":
+            self.command_cp(args)
         elif command == "whoami":
             self.command_whoami(args)
         elif command == "uptime":
@@ -124,6 +126,44 @@ class Shell:
             return
 
         self.current_path = path
+
+    def command_cp(self, args: list[str]) -> None:
+        """Copy a file inside the VFS."""
+        if len(args) != 2:
+            print("cp: expected source and destination")
+            return
+
+        if self.vfs is None:
+            print("cp: VFS is not loaded")
+            return
+
+        source = args[0]
+        destination = args[1]
+
+        if not source.startswith("/"):
+            if self.current_path == "/":
+                source = "/" + source
+            else:
+                source = (
+                        self.current_path.rstrip("/")
+                        + "/"
+                        + source
+                )
+
+        if not destination.startswith("/"):
+            if self.current_path == "/":
+                destination = "/" + destination
+            else:
+                destination = (
+                        self.current_path.rstrip("/")
+                        + "/"
+                        + destination
+                )
+
+        try:
+            self.vfs.copy_file(source, destination)
+        except ValueError as error:
+            print(f"cp: {error}")
 
     def command_whoami(self, args: list[str]) -> None:
         """Print current username."""

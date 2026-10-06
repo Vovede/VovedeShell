@@ -89,3 +89,38 @@ def test_uptime(capsys):
 
     assert captured.out.startswith("up ")
     assert captured.out.endswith(" seconds\n")
+
+def test_cp_relative_destination(capsys):
+    from shell.core import Shell
+    from shell.vfs import VFS
+
+    vfs = VFS({
+        "type": "directory",
+        "children": {
+            "home": {
+                "type": "directory",
+                "children": {
+                    "user.txt": {
+                        "type": "file",
+                        "content": "Hello",
+                    },
+                },
+            },
+        },
+    })
+
+    shell = Shell(vfs)
+    shell.current_path = "/home"
+
+    shell.execute(
+        "cp",
+        ["/home/user.txt", "copy.txt"],
+    )
+
+    shell.command_ls(["/home"])
+
+    captured = capsys.readouterr()
+
+    assert "user.txt\n" in captured.out
+    assert "copy.txt\n" in captured.out
+

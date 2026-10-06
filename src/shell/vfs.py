@@ -130,3 +130,21 @@ class VFS:
                 },
             },
         })
+
+    def copy_file(self, source: str, destination: str) -> None:
+        """Copy a file inside the VFS."""
+        source_node = self.get_node(source)
+
+        if source_node.get("type") != "file":
+            raise ValueError("VFS path is not a file")
+
+        parts = destination.strip("/").split("/")
+        name = parts.pop()
+
+        parent_path = "/" + "/".join(parts) if parts else "/"
+        parent = self.get_node(parent_path)
+
+        if parent.get("type") != "directory":
+            raise ValueError("VFS path is not a directory")
+
+        parent.setdefault("children", {})[name] = source_node.copy()
