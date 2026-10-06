@@ -20,27 +20,17 @@ def test_prompt_contains_username_and_hostname():
 
     assert shell.username in prompt
     assert shell.hostname in prompt
-    assert prompt.endswith(":~$ ")
+    assert prompt.endswith(":/$ ")
 
 
-def test_ls_stub(capsys):
+def test_ls_without_vfs(capsys):
     shell = Shell()
 
     shell.execute("ls", [])
 
     captured = capsys.readouterr()
 
-    assert captured.out == "ls: not implemented yet\n"
-
-
-def test_cd_stub(capsys):
-    shell = Shell()
-
-    shell.execute("cd", [])
-
-    captured = capsys.readouterr()
-
-    assert captured.out == "cd: not implemented yet\n"
+    assert captured.out == "ls: VFS is not loaded\n"
 
 
 def test_unknown_command(capsys):
@@ -76,7 +66,26 @@ def test_run_script(capsys, tmp_path):
 
     assert captured.out == (
         "$ ls\n"
-        "ls: not implemented yet\n"
+        "ls: VFS is not loaded\n"
         "$ unknown\n"
         "Unknown command: unknown\n"
     )
+
+def test_whoami(capsys):
+    shell = Shell()
+
+    shell.execute("whoami", [])
+
+    captured = capsys.readouterr()
+
+    assert captured.out == f"{shell.username}\n"
+
+def test_uptime(capsys):
+    shell = Shell()
+
+    shell.execute("uptime", [])
+
+    captured = capsys.readouterr()
+
+    assert captured.out.startswith("up ")
+    assert captured.out.endswith(" seconds\n")

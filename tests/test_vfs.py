@@ -376,3 +376,58 @@ def test_vfs_init_rejects_arguments(capsys):
         "vfs-init: arguments are not supported\n"
     )
     assert shell.vfs is None
+
+def test_ls_root(capsys):
+    from shell.core import Shell
+    from shell.vfs import VFS
+
+    vfs = VFS({
+        "type": "directory",
+        "children": {
+            "home": {
+                "type": "directory",
+                "children": {},
+            },
+            "readme.txt": {
+                "type": "file",
+                "content": "Hello",
+            },
+        },
+    })
+
+    shell = Shell(vfs)
+    shell.command_ls([])
+
+    captured = capsys.readouterr()
+
+    assert captured.out == "home\nreadme.txt\n"
+
+def test_ls_directory(capsys):
+    from shell.core import Shell
+    from shell.vfs import VFS
+
+    vfs = VFS({
+        "type": "directory",
+        "children": {
+            "home": {
+                "type": "directory",
+                "children": {
+                    "user.txt": {
+                        "type": "file",
+                        "content": "Hello",
+                    },
+                    "notes.txt": {
+                        "type": "file",
+                        "content": "Notes",
+                    },
+                },
+            },
+        },
+    })
+
+    shell = Shell(vfs)
+    shell.command_ls(["/home"])
+
+    captured = capsys.readouterr()
+
+    assert captured.out == "user.txt\nnotes.txt\n"

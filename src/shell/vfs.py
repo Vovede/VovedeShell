@@ -96,6 +96,24 @@ class VFS:
 
         return content.encode("utf-8")
 
+    def get_node(self, path: str) -> dict:
+        """Return a VFS node by path."""
+        parts = path.strip("/").split("/") if path.strip("/") else []
+        node = self.data
+
+        for part in parts:
+            if not isinstance(node, dict):
+                raise ValueError("VFS path not found")
+
+            children = node.get("children", {})
+
+            if part not in children:
+                raise ValueError("VFS path not found")
+
+            node = children[part]
+
+        return node
+
     @classmethod
     def create_default_vfs(cls) -> "VFS":
         """Create default VFS from VFS root directory."""
